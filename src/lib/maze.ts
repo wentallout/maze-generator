@@ -167,7 +167,9 @@ export function generateMaze(width: number, height: number, difficulty: number):
 	startCell.visited = true;
 	stack.push(startCell);
 
+	let steps = 0;
 	while (stack.length > 0) {
+		steps++;
 		const current = stack[stack.length - 1];
 		const neighbors = getNeighbors(current, maze);
 
@@ -180,6 +182,8 @@ export function generateMaze(width: number, height: number, difficulty: number):
 			stack.pop();
 		}
 	}
+
+	console.log(`Maze generation complete: ${steps} steps processed`);
 
 	return maze;
 }
