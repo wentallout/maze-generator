@@ -326,136 +326,43 @@
 	// Create mini example mazes for algorithm visualization
 	const MINI_CELL_SIZE = 50;
 
-	// Step 1: Empty grid with start
-	const step1Cells: Cell[][] = [];
-	for (let y = 0; y < 4; y++) {
-		const row: Cell[] = [];
-		for (let x = 0; x < 4; x++) {
-			row.push({
+	// Step 1: Initialization
+	const demoMaze1: Maze = { 
+		width: 3, 
+		height: 3, 
+		cells: Array.from({ length: 3 }, (_, y) => 
+			Array.from({ length: 3 }, (_, x) => ({
 				x, y,
 				walls: { top: true, right: true, bottom: true, left: true },
 				visited: x === 0 && y === 0
-			});
-		}
-		step1Cells.push(row);
-	}
-	const step1Maze: Maze = { width: 4, height: 4, cells: step1Cells };
+			}))
+		)
+	};
 
-	// Step 2: Show neighbors
-	const step2Cells: Cell[][] = [];
-	for (let y = 0; y < 4; y++) {
-		const row: Cell[] = [];
-		for (let x = 0; x < 4; x++) {
-			row.push({
-				x, y,
-				walls: { top: true, right: true, bottom: true, left: true },
-				visited: x === 0 && y === 0
-			});
-		}
-		step2Cells.push(row);
-	}
-	const step2Maze: Maze = { width: 4, height: 4, cells: step2Cells };
+	// Step 2: Carving a Path
+	const demoMaze2 = JSON.parse(JSON.stringify(demoMaze1));
+	demoMaze2.cells[0][1].visited = true;
+	demoMaze2.cells[0][0].walls.right = false;
+	demoMaze2.cells[0][1].walls.left = false;
 
-	// Step 3: Move right, remove wall
-	const step3Cells: Cell[][] = [];
-	for (let y = 0; y < 4; y++) {
-		const row: Cell[] = [];
-		for (let x = 0; x < 4; x++) {
-			row.push({
-				x, y,
-				walls: { top: true, right: true, bottom: true, left: true },
-				visited: (x === 0 && y === 0) || (x === 1 && y === 0)
-			});
-		}
-		step3Cells.push(row);
-	}
-	step3Cells[0][0].walls.right = false;
-	step3Cells[0][1].walls.left = false;
-	const step3Maze: Maze = { width: 4, height: 4, cells: step3Cells };
+	// Step 3: Hitting a Dead End
+	const demoMaze3 = JSON.parse(JSON.stringify(demoMaze2));
+	// Add a few more steps to form a dead end at (1,1)
+	// Path: (0,0) -> (0,1) -> (1,1)
+	// Blockers: (1,0) visited, (0,1) visited, (2,1) visited, (1,2) visited
+	demoMaze3.cells[1][1].visited = true; // Current
+	demoMaze3.cells[0][1].walls.bottom = false;
+	demoMaze3.cells[1][1].walls.top = false;
+	
+	// Surround (1,1) with visited neighbors to create dead end
+	demoMaze3.cells[1][0].visited = true; // Right of (0,0), Top of (1,1) - blocked
+	demoMaze3.cells[1][2].visited = true; // Right of (1,1) - blocked
+	demoMaze3.cells[2][1].visited = true; // Bottom of (1,1) - blocked
+	// (0,1) is Left of (1,1) - visited (parent)
 
-	// Step 4: Continue path, hit dead end
-	const step4Cells: Cell[][] = [];
-	for (let y = 0; y < 4; y++) {
-		const row: Cell[] = [];
-		for (let x = 0; x < 4; x++) {
-			row.push({
-				x, y,
-				walls: { top: true, right: true, bottom: true, left: true },
-				visited: false
-			});
-		}
-		step4Cells.push(row);
-	}
-	const path4 = [{x:0,y:0}, {x:1,y:0}, {x:2,y:0}, {x:2,y:1}];
-	for (const p of path4) {
-		step4Cells[p.y][p.x].visited = true;
-	}
-	step4Cells[0][0].walls.right = false;
-	step4Cells[0][1].walls.left = false;
-	step4Cells[0][1].walls.right = false;
-	step4Cells[0][2].walls.left = false;
-	step4Cells[0][2].walls.bottom = false;
-	step4Cells[1][2].walls.top = false;
-	const step4Maze: Maze = { width: 4, height: 4, cells: step4Cells };
-
-	// Step 5: Backtrack
-	const step5Cells: Cell[][] = [];
-	for (let y = 0; y < 4; y++) {
-		const row: Cell[] = [];
-		for (let x = 0; x < 4; x++) {
-			row.push({
-				x, y,
-				walls: { top: true, right: true, bottom: true, left: true },
-				visited: false
-			});
-		}
-		step5Cells.push(row);
-	}
-	for (const p of path4) {
-		step5Cells[p.y][p.x].visited = true;
-	}
-	step5Cells[0][0].walls.right = false;
-	step5Cells[0][1].walls.left = false;
-	step5Cells[0][1].walls.right = false;
-	step5Cells[0][2].walls.left = false;
-	step5Cells[0][2].walls.bottom = false;
-	step5Cells[1][2].walls.top = false;
-	const step5Maze: Maze = { width: 4, height: 4, cells: step5Cells };
-
-	// Step 6: Complete mini maze
-	const step6Cells: Cell[][] = [];
-	for (let y = 0; y < 4; y++) {
-		const row: Cell[] = [];
-		for (let x = 0; x < 4; x++) {
-			row.push({
-				x, y,
-				walls: { top: true, right: true, bottom: true, left: true },
-				visited: true
-			});
-		}
-		step6Cells.push(row);
-	}
-	step6Cells[0][0].walls.right = false;
-	step6Cells[0][1].walls.left = false;
-	step6Cells[0][1].walls.bottom = false;
-	step6Cells[1][1].walls.top = false;
-	step6Cells[1][1].walls.right = false;
-	step6Cells[1][2].walls.left = false;
-	step6Cells[0][2].walls.bottom = false;
-	step6Cells[1][2].walls.top = false;
-	step6Cells[1][2].walls.right = false;
-	step6Cells[1][3].walls.left = false;
-	step6Cells[1][3].walls.bottom = false;
-	step6Cells[2][3].walls.top = false;
-	step6Cells[2][3].walls.left = false;
-	step6Cells[2][2].walls.right = false;
-	step6Cells[2][2].walls.bottom = false;
-	step6Cells[3][2].walls.top = false;
-	step6Cells[2][0].walls.bottom = false;
-	step6Cells[3][0].walls.top = false;
-	step6Cells[3][0].walls.right = false;
-	step6Cells[3][1].walls.left = false;
-	const step6Maze: Maze = { width: 4, height: 4, cells: step6Cells };
+	// Step 4: Backtracking
+	const demoMaze4 = JSON.parse(JSON.stringify(demoMaze3));
+	// Structure is same as 3, but we will visualize the focus shifting back to (0,1)
 </script>
 
 <div class="max-w-[1600px] mx-auto px-4 py-8 md:py-12">
@@ -884,9 +791,28 @@
 					Algorithm Walkthrough
 				</h2>
 
-				{#snippet miniMaze(maze: Maze, highlightCell: Point | null, currentCell: Point | null, backtrackPath: Point[] | null)}
-					<div class="relative group/mini p-4 rounded-2xl bg-slate-950/40 border border-white/5">
-						<svg width={maze.width * MINI_CELL_SIZE + 2} height={maze.height * MINI_CELL_SIZE + 2} class="overflow-visible">
+				{#snippet miniMaze(maze: Maze, highlightCell: Point | null, currentCell: Point | null, backtrackPath: Point[] | null, arrow: { from: Point, to: Point, type: 'move' | 'backtrack' | 'blocked' } | null)}
+					<div class="relative group/mini p-4 rounded-2xl bg-slate-950/40 border border-white/5 overflow-hidden">
+						<!-- Glow background based on step type -->
+						<div class="absolute inset-0 opacity-20 pointer-events-none transition-colors duration-500
+							{arrow?.type === 'move' ? 'bg-cyan-500/10' : ''}
+							{arrow?.type === 'backtrack' ? 'bg-violet-500/10' : ''}
+							{arrow?.type === 'blocked' ? 'bg-rose-500/10' : ''}
+						"></div>
+
+						<svg width={maze.width * MINI_CELL_SIZE + 2} height={maze.height * MINI_CELL_SIZE + 2} class="overflow-visible relative z-10">
+							<defs>
+								<marker id="arrowhead-move" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+									<polygon points="0 0, 10 3.5, 0 7" fill="#22d3ee" />
+								</marker>
+								<marker id="arrowhead-backtrack" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+									<polygon points="0 0, 10 3.5, 0 7" fill="#a78bfa" />
+								</marker> 
+								<marker id="arrowhead-blocked" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+									<polygon points="0 0, 10 3.5, 0 7" fill="#fb7185" />
+								</marker>
+							</defs>
+
 							{#each maze.cells as row, y}
 								{#each row as cell, x}
 									{@const cx = cell.x * MINI_CELL_SIZE + MINI_CELL_SIZE/2}
@@ -894,6 +820,7 @@
 									{@const isHighlight = highlightCell && highlightCell.x === x && highlightCell.y === y}
 									{@const isCurrent = currentCell && currentCell.x === x && currentCell.y === y}
 									{@const isBacktrack = backtrackPath && backtrackPath.some(p => p.x === x && p.y === y)}
+									{@const isStart = x === 0 && y === 0 && !arrow}
 
 									<!-- Background -->
 									<rect
@@ -905,65 +832,137 @@
 										class="transition-colors duration-500"
 									/>
 
+
+
 									<!-- Walls -->
 									{#each [
-										{ dir: 'top', wx: 0, wy: 0, ww: MINI_CELL_SIZE, wh: 2 },
-										{ dir: 'right', wx: MINI_CELL_SIZE, wy: 0, ww: 2, wh: MINI_CELL_SIZE },
-										{ dir: 'bottom', wx: 0, wy: MINI_CELL_SIZE, ww: MINI_CELL_SIZE, wh: 2 },
-										{ dir: 'left', wx: 0, wy: 0, ww: 2, wh: MINI_CELL_SIZE }
+										{ dir: 'top', wx: 0, wy: 0, ww: MINI_CELL_SIZE, wh: 3 },
+										{ dir: 'right', wx: MINI_CELL_SIZE, wy: 0, ww: 3, wh: MINI_CELL_SIZE },
+										{ dir: 'bottom', wx: 0, wy: MINI_CELL_SIZE, ww: MINI_CELL_SIZE, wh: 3 },
+										{ dir: 'left', wx: 0, wy: 0, ww: 3, wh: MINI_CELL_SIZE }
 									] as wallInfo}
 										{@const { dir, wx, wy, ww, wh } = wallInfo}
 										{#if cell.walls[dir as keyof typeof cell.walls]}
 											<rect 
-												x={cell.x * MINI_CELL_SIZE + wx - (ww === 2 ? 1 : 0)} 
-												y={cell.y * MINI_CELL_SIZE + wy - (wh === 2 ? 1 : 0)} 
+												x={cell.x * MINI_CELL_SIZE + wx - (ww === 3 ? 1.5 : 0)} 
+												y={cell.y * MINI_CELL_SIZE + wy - (wh === 3 ? 1.5 : 0)} 
 												width={ww} 
 												height={wh} 
-												fill="rgba(255,255,255,0.2)"
+												rx="1.5"
+												fill="#ffffff"
+												class="shadow-[0_0_5px_rgba(255,255,255,0.5)]"
 											/>
 										{/if}
 									{/each}
 
 									{#if isCurrent}
-										<text x={cx} y={cy} text-anchor="middle" dominant-baseline="middle" class="text-xl">🐭</text>
+										<text x={cx} y={cy} text-anchor="middle" dominant-baseline="middle" class="text-2xl animate-bounce">🐭</text>
 										<circle cx={cx} cy={cy} r={MINI_CELL_SIZE/2} fill="rgba(139, 92, 246, 0.2)" class="animate-ping"/>
+									{/if}
+									{#if isStart}
+										<text x={cx} y={cy} text-anchor="middle" dominant-baseline="middle" class="text-2xl animate-pulse">✨</text>
 									{/if}
 								{/each}
 							{/each}
+
+							<!-- Animated Arrow -->
+							{#if arrow}
+								{@const x1 = arrow.from.x * MINI_CELL_SIZE + MINI_CELL_SIZE/2}
+								{@const y1 = arrow.from.y * MINI_CELL_SIZE + MINI_CELL_SIZE/2}
+								{@const x2 = arrow.to.x * MINI_CELL_SIZE + MINI_CELL_SIZE/2}
+								{@const y2 = arrow.to.y * MINI_CELL_SIZE + MINI_CELL_SIZE/2}
+								
+								<!-- Path Line -->
+								<line 
+									x1={x1} y1={y1} x2={x2} y2={y2} 
+									stroke={arrow.type === 'move' ? '#22d3ee' : (arrow.type === 'blocked' ? '#fb7185' : '#a78bfa')}
+									stroke-width="3"
+									stroke-dasharray={arrow.type === 'backtrack' ? '4,4' : 'none'}
+									marker-end="url(#arrowhead-{arrow.type})"
+									class="opacity-80"
+								>
+									{#if arrow.type === 'move'}
+										<animate attributeName="stroke-dasharray" from="0,100" to="100,0" dur="1.5s" repeatCount="indefinite" />
+									{:else if arrow.type === 'backtrack'}
+										<animate attributeName="stroke-dashoffset" from="0" to="-8" dur="1s" repeatCount="indefinite" />
+									{/if}
+								</line>
+								
+								<!-- Moving Dot/Tip for emphasis -->
+								<circle r="4" fill="white" class="animate-pulse">
+									<animateMotion 
+										dur={arrow.type === 'blocked' ? '0.5s' : '1.5s'} 
+										repeatCount="indefinite"
+										path="M{x1},{y1} L{x2},{y2}"
+										keyPoints={arrow.type === 'blocked' ? "0;0.5;0" : "0;1"}
+										keyTimes={arrow.type === 'blocked' ? "0;0.5;1" : "0;1"}
+										calcMode="linear"
+									/>
+								</circle>
+							{/if}
 						</svg>
 					</div>
 				{/snippet}
 
-				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					<!-- Step Cards -->
-					<div class="p-6 rounded-2xl bg-slate-900/50 border border-white/5 space-y-4">
-						<div class="flex items-center gap-3">
-							<span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold font-mono">01</span>
-							<h3 class="font-bold text-white uppercase tracking-wider text-sm">Genesis</h3>
+				<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+					<!-- Step 1: Start -->
+					<div class="p-5 rounded-2xl bg-slate-900/50 border border-white/5 space-y-4 relative overflow-hidden group hover:border-emerald-500/30 transition-colors">
+						<div class="absolute top-0 right-0 p-4 opacity-10 font-black text-6xl text-slate-700 pointer-events-none group-hover:opacity-20 transition-opacity">1</div>
+						<div class="flex items-center gap-3 relative z-10">
+							<span class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold shadow-[0_0_10px_rgba(16,185,129,0.2)]">1</span>
+							<h3 class="font-bold text-white tracking-wide text-sm">The Spark</h3>
 						</div>
-						{@render miniMaze(step1Maze, {x:0, y:0}, {x:0, y:0}, null)}
-						<p class="text-xs text-slate-400 leading-relaxed italic border-l-2 border-emerald-500/30 pl-3">We begin in the top-left sanctuary. All barriers remain impenetrable until exploration begins.</p>
+						<div class="flex justify-center py-2 h-[160px] items-center">
+							{@render miniMaze(demoMaze1, null, {x:0, y:0}, null, null)}
+						</div>
+						<p class="text-xs text-slate-400 leading-relaxed border-t border-white/5 pt-3">
+							Start at <strong class="text-emerald-400">top-left</strong>. The grid is full of walls (gray lines). We mark this first spot as "visited" (green).
+						</p>
 					</div>
 
-					<div class="p-6 rounded-2xl bg-slate-900/50 border border-white/5 space-y-4">
-						<div class="flex items-center gap-3">
-							<span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs font-bold font-mono">02</span>
-							<h3 class="font-bold text-white uppercase tracking-wider text-sm">Observation</h3>
+					<!-- Step 2: Carve -->
+					<div class="p-5 rounded-2xl bg-slate-900/50 border border-white/5 space-y-4 relative overflow-hidden group hover:border-cyan-500/30 transition-colors">
+						<div class="absolute top-0 right-0 p-4 opacity-10 font-black text-6xl text-slate-700 pointer-events-none group-hover:opacity-20 transition-opacity">2</div>
+						<div class="flex items-center gap-3 relative z-10">
+							<span class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-sm font-bold shadow-[0_0_10px_rgba(6,182,212,0.2)]">2</span>
+							<h3 class="font-bold text-white tracking-wide text-sm">Exploration</h3>
 						</div>
-						<div class="flex gap-4">
-							{@render miniMaze(step2Maze, {x:1, y:0}, {x:0, y:0}, null)}
-							{@render miniMaze(step2Maze, {x:0, y:1}, {x:0, y:0}, null)}
+						<div class="flex justify-center py-2 h-[160px] items-center">
+							{@render miniMaze(demoMaze2, {x:0, y:1}, {x:1, y:0}, null, { from: {x:1, y:0}, to: {x:0, y:1}, type: 'move' })}
 						</div>
-						<p class="text-xs text-slate-400 leading-relaxed italic border-l-2 border-cyan-500/30 pl-3">Scanning for adjacent temporal portals. Every unvisited node is a potential expansion vector.</p>
+						<p class="text-xs text-slate-400 leading-relaxed border-t border-white/5 pt-3">
+							We pick a random neighbor (blue arrow). We <strong class="text-cyan-400">smash the wall</strong> between them and move there! This creates a path.
+						</p>
 					</div>
 
-					<div class="p-6 rounded-2xl bg-slate-900/50 border border-white/5 space-y-4">
-						<div class="flex items-center gap-3">
-							<span class="w-6 h-6 rounded-full bg-violet-500/20 text-violet-400 flex items-center justify-center text-xs font-bold font-mono">03</span>
-							<h3 class="font-bold text-white uppercase tracking-wider text-sm">Expansion</h3>
+					<!-- Step 3: Dead End -->
+					<div class="p-5 rounded-2xl bg-slate-900/50 border border-white/5 space-y-4 relative overflow-hidden group hover:border-rose-500/30 transition-colors">
+						<div class="absolute top-0 right-0 p-4 opacity-10 font-black text-6xl text-slate-700 pointer-events-none group-hover:opacity-20 transition-opacity">3</div>
+						<div class="flex items-center gap-3 relative z-10">
+							<span class="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center text-sm font-bold shadow-[0_0_10px_rgba(244,63,94,0.2)]">3</span>
+							<h3 class="font-bold text-white tracking-wide text-sm">Dead End</h3>
 						</div>
-						{@render miniMaze(step3Maze, null, {x:1, y:0}, null)}
-						<p class="text-xs text-slate-400 leading-relaxed italic border-l-2 border-violet-500/30 pl-3">Picking a random trajectory and deconstructing the barrier. Entropy fuels the path creation.</p>
+						<div class="flex justify-center py-2 h-[160px] items-center">
+							{@render miniMaze(demoMaze3, null, {x:1, y:1}, null, { from: {x:1, y:1}, to: {x:2, y:1}, type: 'blocked' })}
+						</div>
+						<p class="text-xs text-slate-400 leading-relaxed border-t border-white/5 pt-3">
+							Uh oh! We can't go anywhere. Every neighbor is either <strong class="text-rose-400">already visited</strong> or off the map. We are stuck!
+						</p>
+					</div>
+
+					<!-- Step 4: Backtrack -->
+					<div class="p-5 rounded-2xl bg-slate-900/50 border border-white/5 space-y-4 relative overflow-hidden group hover:border-violet-500/30 transition-colors">
+						<div class="absolute top-0 right-0 p-4 opacity-10 font-black text-6xl text-slate-700 pointer-events-none group-hover:opacity-20 transition-opacity">4</div>
+						<div class="flex items-center gap-3 relative z-10">
+							<span class="w-8 h-8 rounded-lg bg-violet-500/20 text-violet-400 flex items-center justify-center text-sm font-bold shadow-[0_0_10px_rgba(139,92,246,0.2)]">4</span>
+							<h3 class="font-bold text-white tracking-wide text-sm">Backtracking</h3>
+						</div>
+						<div class="flex justify-center py-2 h-[160px] items-center">
+							{@render miniMaze(demoMaze4, null, {x:0, y:1}, [{x:1, y:1}], { from: {x:1, y:1}, to: {x:0, y:1}, type: 'backtrack' })}
+						</div>
+						<p class="text-xs text-slate-400 leading-relaxed border-t border-white/5 pt-3">
+							Since we are stuck, we <strong class="text-violet-400">go back</strong> to the previous cell (purple arrow). We keep going back until we find a new path.
+						</p>
 					</div>
 				</div>
 			</div>
